@@ -1,2 +1,49 @@
-# Asyncify
-Swift utility class designed to convert callback-based asynchronous methods into the modern async/await pattern.
+# Asyncify 🔄
+
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fmesqueeb%2FAsyncify%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/mesqueeb/Asyncify)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fmesqueeb%2FAsyncify%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/mesqueeb/Asyncify)
+
+```
+.package(url: "https://github.com/mesqueeb/Asyncify", from: "0.0.1")
+```
+
+`Asyncify` is a utility class designed to convert callback-based asynchronous methods into Swift's `async/await` pattern.
+This class is useful for adapting existing asynchronous code that uses callback functions / completion handlers to the newer `async/await` syntax in Swift,
+simplifying concurrency management in your codebase.
+
+Usage Example for a Swift Function:
+
+Suppose you have a function that performs an asynchronous operation using a completion handler to deliver its result.
+You can use `Asyncify` to wrap this function and call it using Swift's `async/await` syntax.
+
+Example:
+
+```swift
+// Example asynchronous function using a completion handler
+func fetchUserDataWithHandler(completion: @escaping (Result<UserData, Error>) -> Void) {
+    // ... your function implementation
+}
+
+// Using Asyncify to wrap the asynchronous function
+let userDataConverter = Asyncify<UserData>()
+
+// Converting the callback-based function into an async function
+func fetchUserData() async throws -> UserData {
+    try await userDataConverter.performOperation { completion in
+        fetchUserDataWithHandler(completion: completion)
+    }
+}
+
+// Usage
+Task {
+    do {
+        let userData = try await fetchUserData()
+        print("Fetched user data: \(userData)")
+    } catch {
+        print("Failed to fetch user data: \(error)")
+    }
+}
+```
+
+This example demonstrates how `Asyncify` can be used to adapt a traditional callback-based function (`fetchUserData`)
+into a modern `async/await` pattern (`getUserDataAsync`), making it easier to use within Swift's concurrency model.
