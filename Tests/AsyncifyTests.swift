@@ -1,7 +1,6 @@
 @testable import Asyncify
 import XCTest
 
-@available(macOS 10.15, iOS 17.0, *)
 final class AsyncifyTests: XCTestCase {
   // Test successful async operation
   func testAsyncOperationSuccess() async throws {

@@ -1,6 +1,5 @@
 import Foundation
 
-@available(macOS 10.15, iOS 17.0, *)
 actor AsyncifyActor<ResultType> {
   private var continuation: CheckedContinuation<ResultType, Error>?
   private var subscribers: [(Result<ResultType, Error>) -> Void] = []
@@ -81,7 +80,6 @@ actor AsyncifyActor<ResultType> {
 ///
 /// This example demonstrates how `Asyncify` can be used to adapt a traditional callback-based function (`fetchUserData`)
 /// into a modern `async/await` pattern (`getUserDataAsync`), making it easier to use within Swift's concurrency model.
-@available(macOS 10.15, iOS 17.0, *)
 public final class Asyncify<ResultType> {
   private let actor = AsyncifyActor<ResultType>()
 
