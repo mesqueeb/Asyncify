@@ -14,7 +14,8 @@ let package = Package(
   ],
   targets: [
     .target(
-      name: "Asyncify"
+      name: "Asyncify",
+      swiftSettings: [.enableExperimentalFeature("StrictConcurrency")]
     ),
     .testTarget(
       name: "AsyncifyTests",

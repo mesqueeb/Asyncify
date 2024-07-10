@@ -96,7 +96,7 @@ import Testing
     }
   }
 }
-  
+
 // Test concurrency with multiple simultaneous operations
 @Test func concurrencyWithSimultaneousOperations() async throws {
   let converter = Asyncify<Int>()
@@ -130,4 +130,60 @@ import Testing
   for result in results {
     #expect(result == expectedResult, "Each result should match the expected result.")
   }
+}
+
+// Test immediate success operation
+@Test func immediateSuccessOperation() async throws {
+  let converter = Asyncify<String>()
+  let expectedResult = "Immediate success result"
+      
+  let result = try await converter.performOperation { completion in
+    // Immediately complete the operation
+    completion(.success(expectedResult))
+  }
+      
+  #expect(result == expectedResult, "The result should be equal to the expected result.")
+}
+
+// Test immediate failure operation
+@Test func immediateFailureOperation() async throws {
+  let converter = Asyncify<String>()
+  let expectedError = NSError(domain: "ImmediateTestError", code: 2, userInfo: nil)
+      
+  do {
+    _ = try await converter.performOperation { completion in
+      // Immediately complete the operation with failure
+      completion(.failure(expectedError))
+    }
+    Issue.record("The operation should have failed.")
+  } catch {
+    #expect(error as NSError == expectedError, "The error should be equal to the expected error.")
+  }
+}
+
+// Test re-entrancy
+@Test func reentrancyTest() async throws {
+  let converter = Asyncify<String>()
+  let expectedResult = "Re-entrancy result"
+      
+  let result = try await converter.performOperation { completion in
+    // Simulate asynchronous operation success
+    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+      completion(.success(expectedResult))
+              
+      // Call performOperation again within the same operation
+      Task {
+        do {
+          let reentrantResult = try await converter.performOperation { reentrantCompletion in
+            reentrantCompletion(.success("Re-entrant success"))
+          }
+          #expect(reentrantResult == "Re-entrant success", "The re-entrant result should be successful.")
+        } catch {
+          Issue.record("Re-entrant operation should not fail.")
+        }
+      }
+    }
+  }
+      
+  #expect(result == expectedResult, "The result should be equal to the expected result.")
 }

@@ -1,11 +1,11 @@
 import Foundation
 
-actor AsyncifyActor<ResultType> {
+actor AsyncifyActor<ResultType: Sendable> {
   private var continuation: CheckedContinuation<ResultType, Error>?
   private var subscribers: [(Result<ResultType, Error>) -> Void] = []
   private var isOperationInProgress = false
 
-  func performOperation(operation: @escaping (@escaping (Result<ResultType, Error>) -> Void) -> Void) async throws -> ResultType {
+  func performOperation(operation: @Sendable @escaping (@Sendable @escaping (Result<ResultType, Error>) -> Void) -> Void) async throws -> ResultType {
     if isOperationInProgress {
       // Add subscriber and wait for result
       return try await withCheckedThrowingContinuation { continuation in
@@ -18,7 +18,7 @@ actor AsyncifyActor<ResultType> {
       return try await withCheckedThrowingContinuation { [self] continuation in
         self.continuation = continuation
         operation { result in
-          self.completeOperation(with: result)
+          Task { await self.completeOperation(with: result) }
         }
       }
     }
@@ -67,7 +67,7 @@ actor AsyncifyActor<ResultType> {
 ///     }
 /// }
 ///
-/// // Usage
+/// // Usage of your newly created async function:
 /// Task {
 ///     do {
 ///         let userData = try await fetchUserData()
@@ -80,12 +80,12 @@ actor AsyncifyActor<ResultType> {
 ///
 /// This example demonstrates how `Asyncify` can be used to adapt a traditional callback-based function (`fetchUserData`)
 /// into a modern `async/await` pattern (`getUserDataAsync`), making it easier to use within Swift's concurrency model.
-public final class Asyncify<ResultType> {
+public final class Asyncify<ResultType: Sendable> {
   private let actor = AsyncifyActor<ResultType>()
 
   public init() {}
 
-  public func performOperation(operation: @escaping (@escaping (Result<ResultType, Error>) -> Void) -> Void) async throws -> ResultType {
+  public func performOperation(operation: @Sendable @escaping (@Sendable @escaping (Result<ResultType, Error>) -> Void) -> Void) async throws -> ResultType {
     return try await actor.performOperation(operation: operation)
   }
 }
