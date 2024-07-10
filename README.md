@@ -8,10 +8,10 @@
 ```
 
 `Asyncify` is a utility class designed to convert callback-based asynchronous methods into Swift's `async/await` pattern.
-This class is useful for adapting existing asynchronous code that uses callback functions / completion handlers to the newer `async/await` syntax in Swift,
-simplifying concurrency management in your codebase.
 
-Usage Example for a Swift Function:
+This class is useful for adapting existing asynchronous code that uses callback functions / completion handlers to the newer `async/await` syntax in Swift, simplifying concurrency management in your codebase.
+
+## Usage
 
 Suppose you have a function that performs an asynchronous operation using a completion handler to deliver its result.
 You can use `Asyncify` to wrap this function and call it using Swift's `async/await` syntax.
@@ -47,3 +47,7 @@ Task {
 
 This example demonstrates how `Asyncify` can be used to adapt a traditional callback-based function (`fetchUserData`)
 into a modern `async/await` pattern (`getUserDataAsync`), making it easier to use within Swift's concurrency model.
+
+## Documentation
+
+See the [documentation](https://swiftpackageindex.com/mesqueeb/asyncify/main/documentation/asyncify/asyncify) for more info.
