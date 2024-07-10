@@ -39,12 +39,12 @@ import Foundation
 ///
 /// This example demonstrates how `Asyncify` can be used to adapt a traditional callback-based function (`fetchUserData`)
 /// into a modern `async/await` pattern (`getUserDataAsync`), making it easier to use within Swift's concurrency model.
-actor Asyncify<ResultType: Sendable> {
+public actor Asyncify<ResultType: Sendable> {
   private var continuation: CheckedContinuation<ResultType, Error>?
   private var subscribers: [(Result<ResultType, Error>) -> Void] = []
   private var isOperationInProgress = false
 
-  func performOperation(operation: @Sendable @escaping (@Sendable @escaping (Result<ResultType, Error>) -> Void) -> Void) async throws -> ResultType {
+  public func performOperation(operation: @Sendable @escaping (@Sendable @escaping (Result<ResultType, Error>) -> Void) -> Void) async throws -> ResultType {
     if isOperationInProgress {
       // Add subscriber and wait for result
       return try await withCheckedThrowingContinuation { continuation in
