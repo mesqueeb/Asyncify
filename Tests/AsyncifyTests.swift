@@ -4,10 +4,10 @@ import Testing
 
 // Test successful async operation
 @Test func asyncOperationSuccess() async throws {
-  let converter = Asyncify<String>()
+  let asyncify = Asyncify<String>()
   let expectedResult = "Success result"
         
-  let result = try await converter.performOperation { completion in
+  let result = try await asyncify.performOperation { completion in
     // Simulate asynchronous operation success
     DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
       completion(.success(expectedResult))
@@ -19,11 +19,11 @@ import Testing
 
 // Test failed async operation
 @Test func asyncOperationFailure() async throws {
-  let converter = Asyncify<String>()
+  let asyncify = Asyncify<String>()
   let expectedError = NSError(domain: "TestError", code: 1, userInfo: nil)
         
   do {
-    _ = try await converter.performOperation { completion in
+    _ = try await asyncify.performOperation { completion in
       // Simulate asynchronous operation failure
       DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
         completion(.failure(expectedError))
@@ -37,17 +37,17 @@ import Testing
 
 // Test multiple callers receive the same success result
 @Test func multipleCallersSuccess() async throws {
-  let converter = Asyncify<String>()
+  let asyncify = Asyncify<String>()
   let expectedResult = "Shared success result"
         
-  async let firstCallerResult: String = converter.performOperation { completion in
+  async let firstCallerResult: String = asyncify.performOperation { completion in
     // Simulate asynchronous operation success for multiple callers
     DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
       completion(.success(expectedResult))
     }
   }
         
-  async let secondCallerResult: String = converter.performOperation { _ in }
+  async let secondCallerResult: String = asyncify.performOperation { _ in }
         
   let results = try await [firstCallerResult, secondCallerResult]
   for result in results {
@@ -57,12 +57,12 @@ import Testing
 
 // Test multiple callers with one operation failing
 @Test func multipleCallersOneFails() async throws {
-  let converter = Asyncify<String>()
+  let asyncify = Asyncify<String>()
   let expectedError = NSError(domain: "TestError", code: 1, userInfo: nil)
       
   let firstCallerTask = Task { () -> Result<String, Error> in
     do {
-      let result = try await converter.performOperation { completion in
+      let result = try await asyncify.performOperation { completion in
         // Simulate operation failure for multiple callers
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
           completion(.failure(expectedError))
@@ -76,7 +76,7 @@ import Testing
       
   let secondCallerTask = Task { () -> Result<String, Error> in
     do {
-      let result = try await converter.performOperation { _ in }
+      let result = try await asyncify.performOperation { _ in }
       return .success(result)
     } catch {
       return .failure(error)
@@ -99,14 +99,14 @@ import Testing
 
 // Test concurrency with multiple simultaneous operations
 @Test func concurrencyWithSimultaneousOperations() async throws {
-  let converter = Asyncify<Int>()
+  let asyncify = Asyncify<Int>()
   let operationCount = 100 // Number of concurrent operations
   let expectedResult = 42 // Arbitrary expected result for this test
         
   // Create an array of tasks, each performing an operation
   let tasks = (1 ... operationCount).map { i in
     Task<Int, Error> {
-      try await converter.performOperation { completion in
+      try await asyncify.performOperation { completion in
         // Simulate a slight delay and then complete successfully
         DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(i * 10)) {
           completion(.success(expectedResult))
@@ -134,10 +134,10 @@ import Testing
 
 // Test immediate success operation
 @Test func immediateSuccessOperation() async throws {
-  let converter = Asyncify<String>()
+  let asyncify = Asyncify<String>()
   let expectedResult = "Immediate success result"
       
-  let result = try await converter.performOperation { completion in
+  let result = try await asyncify.performOperation { completion in
     // Immediately complete the operation
     completion(.success(expectedResult))
   }
@@ -147,11 +147,11 @@ import Testing
 
 // Test immediate failure operation
 @Test func immediateFailureOperation() async throws {
-  let converter = Asyncify<String>()
+  let asyncify = Asyncify<String>()
   let expectedError = NSError(domain: "ImmediateTestError", code: 2, userInfo: nil)
       
   do {
-    _ = try await converter.performOperation { completion in
+    _ = try await asyncify.performOperation { completion in
       // Immediately complete the operation with failure
       completion(.failure(expectedError))
     }
@@ -163,10 +163,10 @@ import Testing
 
 // Test re-entrancy
 @Test func reentrancyTest() async throws {
-  let converter = Asyncify<String>()
+  let asyncify = Asyncify<String>()
   let expectedResult = "Re-entrancy result"
       
-  let result = try await converter.performOperation { completion in
+  let result = try await asyncify.performOperation { completion in
     // Simulate asynchronous operation success
     DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
       completion(.success(expectedResult))
@@ -174,7 +174,7 @@ import Testing
       // Call performOperation again within the same operation
       Task {
         do {
-          let reentrantResult = try await converter.performOperation { reentrantCompletion in
+          let reentrantResult = try await asyncify.performOperation { reentrantCompletion in
             reentrantCompletion(.success("Re-entrant success"))
           }
           #expect(reentrantResult == "Re-entrant success", "The re-entrant result should be successful.")
