@@ -44,6 +44,8 @@ public actor Asyncify<ResultType: Sendable> {
   private var subscribers: [(Result<ResultType, Error>) -> Void] = []
   private var isOperationInProgress = false
 
+  public init() {}
+
   public func performOperation(operation: @Sendable @escaping (@Sendable @escaping (Result<ResultType, Error>) -> Void) -> Void) async throws -> ResultType {
     if isOperationInProgress {
       // Add subscriber and wait for result
