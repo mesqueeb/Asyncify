@@ -1,6 +1,45 @@
 import Foundation
 
-actor AsyncifyActor<ResultType: Sendable> {
+/// `Asyncify` is a utility class designed to convert callback-based asynchronous methods into Swift's `async/await` pattern.
+/// This class is useful for adapting existing asynchronous code that uses completion handlers to the newer `async/await` syntax in Swift,
+/// simplifying concurrency management in your codebase.
+///
+/// Usage Example for a Swift Function:
+/// Suppose you have a function that performs an asynchronous operation using a completion handler to deliver its result.
+/// You can use `Asyncify` to wrap this function and call it using Swift's `async/await` syntax.
+///
+/// Example:
+///
+/// ```swift
+/// // Example asynchronous function using a completion handler
+/// func fetchUserDataWithHandler(completion: @escaping (Result<UserData, Error>) -> Void) {
+///     // ... your function implementation
+/// }
+///
+/// // Using Asyncify to wrap the asynchronous function
+/// let asyncify = Asyncify<UserData>()
+///
+/// // Converting the callback-based function into an async function
+/// func fetchUserData() async throws -> UserData {
+///     try await asyncify.performOperation { completion in
+///         fetchUserDataWithHandler(completion: completion)
+///     }
+/// }
+///
+/// // Usage of your newly created async function:
+/// Task {
+///     do {
+///         let userData = try await fetchUserData()
+///         print("Fetched user data: \(userData)")
+///     } catch {
+///         print("Failed to fetch user data: \(error)")
+///     }
+/// }
+/// ```
+///
+/// This example demonstrates how `Asyncify` can be used to adapt a traditional callback-based function (`fetchUserData`)
+/// into a modern `async/await` pattern (`getUserDataAsync`), making it easier to use within Swift's concurrency model.
+actor Asyncify<ResultType: Sendable> {
   private var continuation: CheckedContinuation<ResultType, Error>?
   private var subscribers: [(Result<ResultType, Error>) -> Void] = []
   private var isOperationInProgress = false
@@ -38,54 +77,5 @@ actor AsyncifyActor<ResultType: Sendable> {
     continuation = nil
     subscribers.removeAll()
     isOperationInProgress = false
-  }
-}
-
-/// `Asyncify` is a utility class designed to convert callback-based asynchronous methods into Swift's `async/await` pattern.
-/// This class is useful for adapting existing asynchronous code that uses completion handlers to the newer `async/await` syntax in Swift,
-/// simplifying concurrency management in your codebase.
-///
-/// Usage Example for a Swift Function:
-/// Suppose you have a function that performs an asynchronous operation using a completion handler to deliver its result.
-/// You can use `Asyncify` to wrap this function and call it using Swift's `async/await` syntax.
-///
-/// Example:
-///
-/// ```swift
-/// // Example asynchronous function using a completion handler
-/// func fetchUserDataWithHandler(completion: @escaping (Result<UserData, Error>) -> Void) {
-///     // ... your function implementation
-/// }
-///
-/// // Using Asyncify to wrap the asynchronous function
-/// let userDataConverter = Asyncify<UserData>()
-///
-/// // Converting the callback-based function into an async function
-/// func fetchUserData() async throws -> UserData {
-///     try await userDataConverter.performOperation { completion in
-///         fetchUserDataWithHandler(completion: completion)
-///     }
-/// }
-///
-/// // Usage of your newly created async function:
-/// Task {
-///     do {
-///         let userData = try await fetchUserData()
-///         print("Fetched user data: \(userData)")
-///     } catch {
-///         print("Failed to fetch user data: \(error)")
-///     }
-/// }
-/// ```
-///
-/// This example demonstrates how `Asyncify` can be used to adapt a traditional callback-based function (`fetchUserData`)
-/// into a modern `async/await` pattern (`getUserDataAsync`), making it easier to use within Swift's concurrency model.
-public final class Asyncify<ResultType: Sendable> {
-  private let actor = AsyncifyActor<ResultType>()
-
-  public init() {}
-
-  public func performOperation(operation: @Sendable @escaping (@Sendable @escaping (Result<ResultType, Error>) -> Void) -> Void) async throws -> ResultType {
-    return try await actor.performOperation(operation: operation)
   }
 }
