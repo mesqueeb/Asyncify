@@ -24,12 +24,12 @@ func fetchUserDataWithHandler(completion: @escaping (Result<UserData, Error>) ->
     // ... your function implementation
 }
 
-// Using Asyncify to wrap the asynchronous function
-let userDataConverter = Asyncify<UserData>()
+// Set up an instance of Asyncify to use in the new async function
+let asyncify = Asyncify<UserData>()
 
-// Converting the callback-based function into an async function
+// Create a new async function using the `asyncify` instance
 func fetchUserData() async throws -> UserData {
-    try await userDataConverter.performOperation { completion in
+    try await asyncify.performOperation { completion in
         fetchUserDataWithHandler(completion: completion)
     }
 }
