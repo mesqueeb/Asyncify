@@ -18,7 +18,7 @@ import Foundation
 ///
 /// // Set up an instance of Asyncify to use in the new async function
 /// let asyncify = Asyncify<UserData>()
-/// 
+///
 /// // Create a new async function using the `asyncify` instance
 /// func fetchUserData() async throws -> UserData {
 ///     try await asyncify.performOperation { completion in
@@ -46,22 +46,19 @@ public actor Asyncify<ResultType: Sendable> {
 
   public init() {}
 
-  public func performOperation(operation: @Sendable @escaping (@Sendable @escaping (Result<ResultType, Error>) -> Void) -> Void) async throws -> ResultType {
-    if isOperationInProgress {
-      // Add subscriber and wait for result
-      return try await withCheckedThrowingContinuation { continuation in
-        addSubscriber { result in
-          continuation.resume(with: result)
-        }
-      }
-    } else {
+  public func performOperation(
+    operation: @Sendable @escaping (@Sendable @escaping (Result<ResultType, Error>) -> Void) -> Void
+  ) async throws -> ResultType {
+    guard isOperationInProgress else {
       isOperationInProgress = true
       return try await withCheckedThrowingContinuation { [self] continuation in
         self.continuation = continuation
-        operation { result in
-          Task { await self.completeOperation(with: result) }
-        }
+        operation { result in Task { await self.completeOperation(with: result) } }
       }
+    }
+    // Add subscriber and wait for result
+    return try await withCheckedThrowingContinuation { continuation in
+      addSubscriber { result in continuation.resume(with: result) }
     }
   }
 
