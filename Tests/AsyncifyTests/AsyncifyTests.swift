@@ -9,7 +9,7 @@ import Testing
   let expectedResult = "Success result"
   let result = try await asyncify.performOperation { completion in
     // Simulate asynchronous operation success
-    DispatchQueue.main.asyncAfter(deadline: .now() + 1) { completion(.success(expectedResult)) }
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) { completion(.success(expectedResult)) }
   }
   #expect(result == expectedResult, "The result should be equal to the expected result.")
 }
@@ -21,7 +21,7 @@ import Testing
   do {
     _ = try await asyncify.performOperation { completion in
       // Simulate asynchronous operation failure
-      DispatchQueue.main.asyncAfter(deadline: .now() + 1) { completion(.failure(expectedError)) }
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) { completion(.failure(expectedError)) }
     }
     Issue.record("The operation should have failed.")
   } catch {
@@ -35,7 +35,7 @@ import Testing
   let expectedResult = "Shared success result"
   async let firstCallerResult: String = asyncify.performOperation { completion in
     // Simulate asynchronous operation success for multiple callers
-    DispatchQueue.main.asyncAfter(deadline: .now() + 1) { completion(.success(expectedResult)) }
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) { completion(.success(expectedResult)) }
   }
   async let secondCallerResult: String = asyncify.performOperation { _ in }
   let results = try await [firstCallerResult, secondCallerResult]
@@ -52,7 +52,9 @@ import Testing
     do {
       let result = try await asyncify.performOperation { completion in
         // Simulate operation failure for multiple callers
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { completion(.failure(expectedError)) }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+          completion(.failure(expectedError))
+        }
       }
       return .success(result)
     } catch { return .failure(error) }
@@ -138,7 +140,7 @@ import Testing
   let expectedResult = "Re-entrancy result"
   let result = try await asyncify.performOperation { completion in
     // Simulate asynchronous operation success
-    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
       completion(.success(expectedResult))
       // Call performOperation again within the same operation
       Task {
