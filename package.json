@@ -20,5 +20,6 @@
     "url": "https://github.com/mesqueeb/Asyncify.git"
   },
   "homepage": "https://github.com/mesqueeb/Asyncify#readme",
-  "bugs": "https://github.com/mesqueeb/Asyncify/issues"
+  "bugs": "https://github.com/mesqueeb/Asyncify/issues",
+  "packageManager": "pnpm@11.3.0"
 }
