@@ -6,20 +6,9 @@ import PackageDescription
 let package = Package(
   name: "Asyncify",
   platforms: [.macOS(.v10_15), .iOS(.v13), .watchOS(.v6), .tvOS(.v13)],
-  products: [
-    .library(
-      name: "Asyncify",
-      targets: ["Asyncify"]
-    ),
-  ],
+  products: [.library(name: "Asyncify", targets: ["Asyncify"])],
   targets: [
-    .target(
-      name: "Asyncify",
-      swiftSettings: [.enableExperimentalFeature("StrictConcurrency")]
-    ),
-    .testTarget(
-      name: "AsyncifyTests",
-      dependencies: ["Asyncify"]
-    ),
+    .target(name: "Asyncify", swiftSettings: [.enableExperimentalFeature("StrictConcurrency")]),
+    .testTarget(name: "AsyncifyTests", dependencies: ["Asyncify"]),
   ]
 )
